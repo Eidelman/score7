@@ -1,0 +1,218 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+ 
+generator client {
+  provider = "prisma-client-js"
+}
+ 
+model User {
+  id            String          @id @default(cuid())
+  name          String?
+  email         String          @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  // Optional for WebAuthn support
+  Authenticator Authenticator[]
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+ 
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+ 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  @@id([provider, providerAccountId])
+}
+ 
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+ 
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+ 
+  @@id([identifier, token])
+}
+ 
+// Optional for WebAuthn support
+model Authenticator {
+  credentialID         String  @unique
+  userId               String
+  providerAccountId    String
+  credentialPublicKey  String
+  counter              Int
+  credentialDeviceType String
+  credentialBackedUp   Boolean
+  transports           String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  @@id([userId, credentialID])
+}
+
+// Tournament Table
+model Tournament {
+  tournament_id   Int     @id @default(autoincrement())
+  name            String  @db.VarChar(100)
+  location        String?  @db.VarChar(100)
+  start_date      DateTime
+  end_date        DateTime
+  tournament_type String  @db.VarChar(50)
+  description     String? @db.Text
+  participants   Int
+  sport_type      String  @db.VarChar(50)
+  matches Match[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("Tournament")
+}
+
+// Team Table
+model Team {
+  team_id    Int      @id @default(autoincrement())
+  team_name  String   @db.VarChar(100)
+  coach_name String   @db.VarChar(100)
+  region     String   @db.VarChar(100)
+
+  players     Player[]
+  matches1    Match[]  @relation("Team1")
+  matches2    Match[]  @relation("Team2")
+  wonMatches  Match[]  @relation("WinnerTeam")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("Team")
+}
+
+// Player Table
+model Player {
+  player_id     Int      @id @default(autoincrement())
+  first_name    String   @db.VarChar(50)
+  last_name     String   @db.VarChar(50)
+  email         String   @db.VarChar(100)
+  date_of_birth DateTime @db.Date
+  team_id       Int
+  team          Team     @relation(fields: [team_id], references: [team_id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("Player")
+}
+
+// Match Table
+model Match {
+  match_id       Int      @id @default(autoincrement())
+  tournament_id  Int
+  round          String   @db.VarChar(50)
+  match_date     DateTime
+  team1_id       Int
+  team2_id       Int
+  score_team1    Int?
+  score_team2    Int?
+  winner_team_id Int?
+
+  tournament     Tournament @relation(fields: [tournament_id], references: [tournament_id], onDelete: Cascade)
+  team1          Team       @relation("Team1", fields: [team1_id], references: [team_id])
+  team2          Team       @relation("Team2", fields: [team2_id], references: [team_id])
+  winner_team    Team?      @relation("WinnerTeam", fields: [winner_team_id], references: [team_id])
+
+  schedule       Schedule?
+  matchOfficials Match_Official[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("Match")
+}
+
+// Venue Table
+model Venue {
+  venue_id  Int       @id @default(autoincrement())
+  name      String    @db.VarChar(100)
+  address   String    @db.VarChar(150)
+  city      String    @db.VarChar(100)
+  capacity  Int
+  schedules Schedule[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("Venue")
+}
+
+// Schedule Table
+model Schedule {
+  schedule_id Int      @id @default(autoincrement())
+  match_id    Int @unique
+  venue_id    Int?
+  start_time  DateTime
+  end_time    DateTime
+
+  match Match @relation(fields: [match_id], references: [match_id], onDelete: Cascade)
+  venue Venue? @relation(fields: [venue_id], references: [venue_id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("Schedule")
+}
+
+// Official Table
+model Official {
+  official_id   Int              @id @default(autoincrement())
+  name          String           @db.VarChar(100)
+  role          String           @db.VarChar(50)
+  email         String           @db.VarChar(100)
+  phone         String           @db.VarChar(20)
+
+  matchOfficials Match_Official[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("Official")
+}
+
+// Match_Official (Many-to-Many Join Table)
+model Match_Official {
+  match_id    Int
+  official_id Int
+
+  match    Match    @relation(fields: [match_id], references: [match_id])
+  official Official @relation(fields: [official_id], references: [official_id])
+
+  @@id([match_id, official_id])
+  @@map("Match_Official")
+}
+
