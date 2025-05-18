@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, PlayerPosition } from "@prisma/client";
 import { TeamSchema } from "../app/utils/zodSchemas";
 const prisma = new PrismaClient();
 
@@ -29,6 +29,8 @@ export async function createTeam(data: z.infer<typeof TeamSchema>) {
               last_name: player.last_name,
               email: player.email,
               date_of_birth: dob,
+              number: player.number ? player.number : 0,
+              position: player.position as PlayerPosition,
             };
           }),
       },
@@ -72,26 +74,32 @@ export async function updateTeam(data: z.infer<typeof TeamSchema>) {
       coach_name: coach_name,
       region: region,
       players: {
-        updateMany: players.map((player) => ({
-          where: { player_id: player.player_id },
-          data: {
-            first_name: player.first_name,
-            last_name: player.last_name,
-            email: player.email,
-            date_of_birth: new Date(player.date_of_birth),
-          },
-        })),
+        update: players
+          .filter((player) => player.player_id) // Only update existing players
+          .map((player) => ({
+            where: { player_id: player.player_id },
+            data: {
+              first_name: player.first_name,
+              last_name: player.last_name,
+              email: player.email,
+              date_of_birth: new Date(player.date_of_birth),
+              number: player.number ? player.number : 0,
+              position: player.position as PlayerPosition, // Cast to PlayerPosition enum
+            },
+          })),
         createMany: {
           data: players
             .filter((player) => !player.player_id) // Only create new players
-            .map((player) => {
-              return {
-                first_name: player.first_name,
-                last_name: player.last_name,
-                email: player.email,
-                date_of_birth: new Date(player.date_of_birth),
-              };
-            }),
+            .map((player) => ({
+              first_name: player.first_name,
+              last_name: player.last_name,
+              position: player.position as PlayerPosition, // Cast to PlayerPosition enum
+              number: player.number ? player.number : 0,
+              email: player.email,
+              date_of_birth: player.date_of_birth,
+
+              // Optionally add createdAt/updatedAt if needed
+            })),
         },
       },
     },

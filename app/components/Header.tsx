@@ -24,7 +24,7 @@ export default async function Header() {
       <div className="flex flex-row gap-8 items-center">
         <>
           <Link
-            href="/encontrar-torneio"
+            href="/"
             className={cn("uppercase text-secondary font-semibold text-sm")}
           >
             Encontrar um torneio
@@ -33,13 +33,7 @@ export default async function Header() {
             href="/dashboard/admin/torneio"
             className={cn("uppercase text-secondary font-semibold text-sm")}
           >
-            Torneios
-          </Link>
-          <Link
-            href="/dashboard/admin/equipa"
-            className={cn("uppercase text-secondary font-semibold text-sm")}
-          >
-            Equipas
+            Admin
           </Link>
           <Link
             href="/criar-torneio"

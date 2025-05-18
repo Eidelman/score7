@@ -24,7 +24,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { createTournament } from "@/actions/torneio.actions";
+import { createSingleRoundRobinTournament } from "@/actions/createSingleRoundRobinTournament";
+import { createDoubleRoundRobinTournament } from "@/actions/createDoubleRoundRobinTournament";
+import { createKnockoutTournament } from "@/actions/knockout.action";
 
 type TeamType = {
   team_id: number;
@@ -67,6 +69,12 @@ TorneioFormProps) {
     name: "teams", // name of the field array
   });
 
+  const validTournamentTypes = [
+    "knockout",
+    "single-round-robin",
+    "double-round-robin",
+  ];
+
   const onSubmitCreate = async (data: z.infer<typeof TournamentSchema>) => {
     // Check if the start date is in the past
     if (data.start_date < new Date()) {
@@ -84,7 +92,22 @@ TorneioFormProps) {
       return;
     }
 
-    const torneio = await createTournament(data); // Call the createTeam function with the form data
+    let torneio = null;
+
+    if (data.tournament_type === validTournamentTypes[0]) {
+      torneio = await createKnockoutTournament(data);
+    }
+
+    if (data.tournament_type === validTournamentTypes[1]) {
+      torneio = await createSingleRoundRobinTournament(data);
+    }
+
+    if (data.tournament_type === validTournamentTypes[2]) {
+      torneio = await createDoubleRoundRobinTournament(data);
+    }
+
+    //const torneio = await createTournament(data);
+
     if (torneio) {
       alert("Torneio created successfully!");
       reset(); // Reset the form after successful submission
@@ -93,17 +116,6 @@ TorneioFormProps) {
       console.error("Failed to create team.");
     }
   };
-
-  /*const onSubmitUpdate = async (data: z.infer<typeof TeamSchema>) => {
-    const team = await updateTeam(data); // Call the createTeam function with the form data
-    if (team) {
-      alert("Team created successfully!");
-      reset(); // Reset the form after successful submission
-      redirect("/equipa"); // Redirect to the team list page
-    } else {
-      console.error("Failed to create team.");
-    }
-  };*/
 
   const addTeam = (value: string) => {
     const parsedValue = JSON.parse(value) as TeamType;
@@ -135,15 +147,64 @@ TorneioFormProps) {
             </Link>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-3">
-            <div className="grid grid-cols-3 gap-1">
+        <CardContent className="space-y-6">
+          <div className="space-y-6">
+            <div className="grid grid-cols-3 gap-2">
               <div className="col-span-2">
                 <Label htmlFor="name">Nome do torneio</Label>
                 <Input id="name" {...register("name", { required: true })} />
               </div>
               <div className="col-span-1">
-                <Label htmlFor="participants"># de Participantes</Label>
+                <Label htmlFor="tournament_type">Tipo de torneio</Label>
+                <Controller
+                  name="tournament_type"
+                  control={control}
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="knockout">Eliminatória</SelectItem>
+                        <SelectItem value="single-round-robin">
+                          Liga - 1 volta
+                        </SelectItem>
+                        <SelectItem value="double-round-robin">
+                          Liga - 2 voltas
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-5 gap-2">
+              <div className="col-span-2">
+                <Label htmlFor="sport_type">Modalidade</Label>
+                <Controller
+                  name="sport_type"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value ?? undefined}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Futebol">Futebol</SelectItem>
+                        <SelectItem value="Futsal">Futsal</SelectItem>
+                        <SelectItem value="Basquetebol">Basquetebol</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+              </div>
+
+              <div className="col-span-1">
+                <Label htmlFor="participants">Participantes</Label>
                 <Controller
                   name="participants"
                   control={control}
@@ -159,28 +220,7 @@ TorneioFormProps) {
                         <SelectItem value="4">4</SelectItem>
                         <SelectItem value="6">6</SelectItem>
                         <SelectItem value="8">8</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-5 gap-2">
-              <div className="col-span-2">
-                <Label htmlFor="tournament_type">Modalidade</Label>
-                <Controller
-                  name="tournament_type"
-                  control={control}
-                  render={({ field }) => (
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Futebol">Futebol</SelectItem>
-                        <SelectItem value="Futsal">Futsal</SelectItem>
-                        <SelectItem value="Basquetebol">Basquetebol</SelectItem>
+                        <SelectItem value="16">16</SelectItem>
                       </SelectContent>
                     </Select>
                   )}

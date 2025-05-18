@@ -31,11 +31,16 @@ export const createTournament = async (
   if (end_date < start_date) {
     throw new Error("End date cannot be before start date.");
   }
-  // Check if the tournament type is valid
-  /*const validTournamentTypes = ["League", "Knockout", "Friendly"];
+
+  //Check if the tournament type is valid
+  const validTournamentTypes = [
+    "knockout",
+    "single-round-robin",
+    "double-round-robin",
+  ];
   if (!validTournamentTypes.includes(tournament_type)) {
     throw new Error("Invalid tournament type.");
-  }*/
+  }
 
   // Check if the number of participants matches the number of teams
   if (data.participants !== data.teams.length) {
@@ -46,11 +51,10 @@ export const createTournament = async (
     throw new Error("At least 2 teams are required.");
   }
   // Check if the teams are unique
-  const teamIds = data.teams.map((team) => team.team_id);
-  const uniqueTeamIds = new Set(teamIds);
+  //const teamIds = data.teams.map((team) => team.team_id);
+  //const uniqueTeamIds = new Set(teamIds);
 
   // 1. Create Tournament
-
   const tournament = await prisma.tournament.create({
     data: {
       name: name,
@@ -64,22 +68,70 @@ export const createTournament = async (
     },
   });
 
-  // 2. Create Matches (simple round-robin logic)
-  for (let i = 0; i < uniqueTeamIds.size; i++) {
-    for (let j = i + 1; j < teamIds.length; j++) {
-      await prisma.match.create({
-        data: {
+  // Create knockout format
+  if (tournament_type === validTournamentTypes[0]) {
+  }
+
+  // Create league format
+  // Generate single round-robin matchups
+  if (tournament_type === validTournamentTypes[1]) {
+    const matchesData = [];
+    let roundNumber = 1;
+
+    for (let i = 0; i < participants - 1; i++) {
+      for (let j = i + 1; j < participants; j++) {
+        matchesData.push({
           tournament_id: tournament.tournament_id,
-          round: "Group Stage",
-          match_date: new Date(start_date.getTime() + i * 24 * 60 * 60 * 1000), // Example: match date is one day after the start date
-          team1_id: teamIds[i],
-          team2_id: teamIds[j],
-          score_team1: 0,
-          score_team2: 0,
-          matchOfficials: undefined,
-        },
-      });
+          round: `Jornada ${roundNumber}`,
+          match_date: new Date(start_date.getTime() + i * 24 * 60 * 60 * 1000),
+          team1_id: data.teams[i].team_id,
+          team2_id: data.teams[j].team_id,
+        });
+        roundNumber++;
+      }
+      roundNumber = 1;
     }
+
+    // 2. Create matches in the database
+    await prisma.match.createMany({
+      data: matchesData,
+    });
+  }
+
+  // Create league format
+  // Generate double round-robin matchups
+  if (tournament_type === validTournamentTypes[2]) {
+    const matchesData = [];
+    let matchNumber = 1;
+
+    for (let i = 0; i < participants - 1; i++) {
+      for (let j = i + 1; j < participants; j++) {
+        // First leg
+        matchesData.push({
+          tournament_id: tournament.tournament_id,
+          round: `Match ${matchNumber}`,
+          match_date: new Date(start_date.getTime() + i * 24 * 60 * 60 * 1000),
+          team1_id: data.teams[i].team_id,
+          team2_id: data.teams[j].team_id,
+        });
+        matchNumber++;
+
+        // Second leg (reverse)
+        matchesData.push({
+          tournament_id: tournament.tournament_id,
+          round: `Match ${matchNumber}`,
+          match_date: new Date(start_date.getTime() + i * 24 * 60 * 60 * 1000),
+          team1_id: data.teams[j].team_id,
+          team2_id: data.teams[i].team_id,
+        });
+        matchNumber++;
+      }
+    }
+
+    // 3. Insert all matches
+    await prisma.match.createMany({
+      data: matchesData,
+    });
   }
 
   // 5. Schedule matches at the venue
@@ -150,3 +202,31 @@ export const deleteTournament = async (tournament_id: number) => {
     throw new Error("Error fetching tournament: Unknown error");
   }
 };
+
+interface TournamentSearchParams {
+  name?: string;
+  tournament_type?: string;
+  sport_type?: string;
+}
+
+export async function findTournament({
+  name,
+  sport_type,
+  tournament_type,
+}: TournamentSearchParams) {
+  //const { name, tournament_type, sport_type } = params;
+
+  // Build dynamic filter object
+  const whereClause: TournamentSearchParams = {};
+
+  if (name) whereClause.name = name;
+  if (tournament_type) whereClause.tournament_type = tournament_type;
+  if (sport_type) whereClause.sport_type = sport_type;
+
+  // Perform the search using the constructed where clause
+  const tournaments = await prisma.tournament.findMany({
+    where: whereClause,
+  });
+
+  return tournaments;
+}

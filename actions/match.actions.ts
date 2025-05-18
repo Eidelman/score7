@@ -87,3 +87,30 @@ export async function updateMatchScore({
     throw new Error("Failed to update match score");
   }
 }
+
+type Schedule = {
+  scheduleId: number;
+  start_time: string;
+  venue_id: number;
+};
+export async function updateSchedule({
+  scheduleId,
+  start_time,
+  venue_id,
+}: Schedule) {
+  try {
+    const updatedSchedule = await prisma.schedule.update({
+      where: { schedule_id: scheduleId },
+      data: {
+        start_time: start_time,
+        end_time: "",
+        venue_id: venue_id,
+      },
+    });
+
+    return updatedSchedule;
+  } catch (error) {
+    console.error("Error updating schedule:", error);
+    throw error;
+  }
+}

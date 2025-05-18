@@ -1,6 +1,9 @@
+import { generateNextRoundNewMatches } from "@/actions/createSorteio";
 import { EditarTorneioForm } from "@/app/components/EditarTorneioForm";
 import { MatchActionsBtn } from "@/app/components/MatchActionsBtn";
+import { checkTournamentMatches } from "@/app/utils/checkTournamentMatches";
 import { TournamentSchema } from "@/app/utils/zodSchemas";
+import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { PrismaClient } from "@prisma/client";
 import { Label } from "@radix-ui/react-label";
@@ -8,13 +11,16 @@ import { Label } from "@radix-ui/react-label";
 import { format } from "date-fns";
 import { z } from "zod";
 
-export async function getTorneioById(id: number) {
+async function getTorneioById(id: number) {
   const prisma = new PrismaClient();
 
   const torneio = await prisma.tournament.findUnique({
     where: { tournament_id: Number(id) },
     include: {
-      matches: { include: { team1: true, team2: true, schedule: true } },
+      matches: {
+        include: { team1: true, team2: true, schedule: true },
+        orderBy: { round: "asc" },
+      },
     },
   });
   return torneio;
@@ -38,7 +44,7 @@ export default async function TorneioEditar({
         tournament_type: torneio.tournament_type,
         description: torneio.description ?? "",
         participants: torneio.participants,
-        sport_type: torneio?.sport_type ?? "",
+        sport_type: torneio?.sport_type,
         teams: [],
       }
     : {
@@ -48,7 +54,10 @@ export default async function TorneioEditar({
         tournament_type: "",
         participants: 0,
         teams: [],
+        sport_type: "",
       };
+
+  const { allPlayed } = await checkTournamentMatches(Number(id));
 
   return (
     <Card className="max-w-4xl mx-auto my-5 space-y-4">
@@ -65,7 +74,26 @@ export default async function TorneioEditar({
         <Card className="">
           <CardHeader>
             <div className="flex justify-between items-center">
-              <CardTitle className="text-xl font-mono">Matches</CardTitle>
+              <CardTitle className="flex flex-row justify-between w-full items-center text-xl font-mono">
+                <div>Matches</div>
+                <div>
+                  <form action={generateNextRoundNewMatches}>
+                    <input
+                      type="hidden"
+                      name="tournamentId"
+                      value={torneio?.tournament_id}
+                    />
+
+                    <Button
+                      type="submit"
+                      className="rounded-full"
+                      disabled={!allPlayed}
+                    >
+                      Generate next round
+                    </Button>
+                  </form>
+                </div>
+              </CardTitle>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -94,6 +122,7 @@ function Match({ match }: { match: any }) {
             team1={match.team1.team_name}
             team2={match.team2.team_name}
             torneio_id={match.tournament_id}
+            schedule_id={match.schedule?.schedule_id}
           />
         </div>
       </div>

@@ -9,6 +9,8 @@ export const PlayerSchema = z.object({
   player_id: z.number().int().optional(),
   first_name: z.string().max(50),
   last_name: z.string().max(50),
+  number: z.coerce.number().int().nullable(),
+  position: z.string().min(1, ""),
   email: z.string().email().max(100),
   date_of_birth: z.coerce.date(), // accepts string/date and converts
   team_id: z.number().int().optional(),
@@ -31,7 +33,7 @@ export const TournamentSchema = z.object({
   tournament_type: z.string().min(1, "Tipo de torneio é obrigatória."),
   description: z.string().nullable().optional(),
   participants: z.coerce.number().int(),
-  sport_type: z.string().nullable().optional(),
+  sport_type: z.string().min(1, "Tipo de modalidade é obrigatória."),
   teams: z.array(
     z.object({ team_id: z.number().int(), team_name: z.string() })
   ),
