@@ -1,3 +1,7 @@
+import { auth, signOut } from "@/app/utils/auth";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 import React, { ReactNode } from "react";
 
 interface AdminLayoutProps {
@@ -9,33 +13,46 @@ const sidebarLinks = [
   { name: "Equipas", href: "/dashboard/admin/equipa" },
 ];
 
-export default function AdminLayout({ children }: AdminLayoutProps) {
+export default async function AdminLayout({ children }: AdminLayoutProps) {
+  const session = await auth();
+  if (!session?.user) {
+    redirect("/");
+  }
+
   return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>
-      <aside className="flex flex-col gap-1 w-[220px] bg-[#1a202c] text-white px-4 py-6">
-        <h2 style={{ marginBottom: "2rem", fontSize: "1.5rem" }}>
-          Admin Panel
-        </h2>
-        <nav>
-          <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-            {sidebarLinks.map((link) => (
-              <li key={link.href} style={{ marginBottom: "1rem" }}>
-                <a
-                  href={link.href}
-                  style={{
-                    color: "#fff",
-                    textDecoration: "none",
-                    fontWeight: 500,
-                  }}
-                >
-                  {link.name}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
+    <div className="flex flex-row">
+      <aside className="flex flex-col h-screen fixed justify-between gap-1 w-[260px] px-5 pt-28 pb-20 border-r">
+        <ul className="p-0 m-0 list-none flex-1 space-y-3">
+          {sidebarLinks.map((link) => (
+            <li key={link.href} style={{ marginBottom: "1rem" }}>
+              <Link
+                href={link.href}
+                className="block px-4 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition-colors"
+              >
+                {link.name}
+              </Link>
+            </li>
+          ))}
+        </ul>
+        {session?.user?.email != null && (
+          <form
+            className="mt-16"
+            action={async () => {
+              "use server";
+              await signOut();
+            }}
+          >
+            <Button
+              type="submit"
+              className="w-full rounded-full"
+              variant="default"
+            >
+              Sair
+            </Button>
+          </form>
+        )}
       </aside>
-      <main style={{ flex: 1, background: "#f7fafc", padding: "2rem" }}>
+      <main className="ml-[260px] p-8 w-full min-h-screen bg-zinc-50 pt-24">
         {children}
       </main>
     </div>

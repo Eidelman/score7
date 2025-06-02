@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import Image from "next/image";
 import Link from "next/link";
 
 const prisma = new PrismaClient();
@@ -68,24 +69,41 @@ const TeamsListPage = async ({ params }: Props) => {
 
   return (
     <main className="max-w-5xl mx-auto ">
-      <h1 className="text-xl font-bold mb-10 text-center">
+      <h1 className="text-md font-semibold mb-2 text-muted-foreground uppercase">
         Equipas participantes
       </h1>
-      <ul className="">
-        <li className="grid grid-cols-3 text-center border-b border-t p-2">
-          <h2 className="text-sm font-semibold uppercase">Nome</h2>
-          <h2 className="text-sm font-semibold uppercase">Treinador</h2>
-          <h2 className="text-sm font-semibold uppercase">Regiao</h2>
+      <ul className="border rounded-lg shadow-md">
+        <li
+          className="grid grid-cols-7 text-center border-b p-2 text-xs font-semibold uppercase 
+        text-muted-foreground bg-zinc-300"
+        >
+          <h2 className="col-span-1 ">Logo</h2>
+          <h2 className="col-span-2 ">Nome</h2>
+          <h2 className="col-span-2 ">Treinador</h2>
+          <h2 className="col-span-2 ">Regiao</h2>
         </li>
         {teams.map((team) => (
           <li key={team.team_id}>
             <Link
               href={`/torneios/${id}/teams/${team.team_id}`}
-              className="grid grid-cols-3 text-center border-b py-2"
+              className="grid grid-cols-7 text-center items-center justify-center border-b py-2 hover:bg-zinc-200"
             >
-              <h2 className="text-md">{team.team_name}</h2>
-              <h2 className="text-md">{team.coach_name}</h2>
-              <h2 className="text-md">{team.region}</h2>
+              <div className="col-span-1 flex justify-center items-center">
+                <Image
+                  src={
+                    team?.logo_url
+                      ? team.logo_url
+                      : "/equipas/default-team-logo.png"
+                  }
+                  alt="team"
+                  width={28}
+                  height={28}
+                  className=""
+                />
+              </div>
+              <h2 className="col-span-2">{team.team_name}</h2>
+              <h2 className="col-span-2">{team.coach_name}</h2>
+              <h2 className="col-span-2">{team.region}</h2>
             </Link>
           </li>
         ))}

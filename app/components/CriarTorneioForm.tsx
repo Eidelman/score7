@@ -27,6 +27,7 @@ import {
 import { createSingleRoundRobinTournament } from "@/actions/createSingleRoundRobinTournament";
 import { createDoubleRoundRobinTournament } from "@/actions/createDoubleRoundRobinTournament";
 import { createKnockoutTournament } from "@/actions/knockout.action";
+import { SPORT_TYPES, TOURNAMENT_TYPES } from "../utils/constants";
 
 type TeamType = {
   team_id: number;
@@ -69,12 +70,6 @@ TorneioFormProps) {
     name: "teams", // name of the field array
   });
 
-  const validTournamentTypes = [
-    "knockout",
-    "single-round-robin",
-    "double-round-robin",
-  ];
-
   const onSubmitCreate = async (data: z.infer<typeof TournamentSchema>) => {
     // Check if the start date is in the past
     if (data.start_date < new Date()) {
@@ -94,15 +89,15 @@ TorneioFormProps) {
 
     let torneio = null;
 
-    if (data.tournament_type === validTournamentTypes[0]) {
+    if (data.tournament_type === TOURNAMENT_TYPES[0].value) {
       torneio = await createKnockoutTournament(data);
     }
 
-    if (data.tournament_type === validTournamentTypes[1]) {
+    if (data.tournament_type === TOURNAMENT_TYPES[0].value) {
       torneio = await createSingleRoundRobinTournament(data);
     }
 
-    if (data.tournament_type === validTournamentTypes[2]) {
+    if (data.tournament_type === TOURNAMENT_TYPES[0].value) {
       torneio = await createDoubleRoundRobinTournament(data);
     }
 
@@ -136,7 +131,7 @@ TorneioFormProps) {
 
   return (
     <form onSubmit={handleSubmit(onSubmitCreate)}>
-      <Card className="max-w-3xl mx-auto my-5">
+      <Card className="">
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle className="text-xl font-mono">{formTile}</CardTitle>
@@ -154,32 +149,17 @@ TorneioFormProps) {
                 <Label htmlFor="name">Nome do torneio</Label>
                 <Input id="name" {...register("name", { required: true })} />
               </div>
+
               <div className="col-span-1">
-                <Label htmlFor="tournament_type">Tipo de torneio</Label>
-                <Controller
-                  name="tournament_type"
-                  control={control}
-                  render={({ field }) => (
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="knockout">Eliminatória</SelectItem>
-                        <SelectItem value="single-round-robin">
-                          Liga - 1 volta
-                        </SelectItem>
-                        <SelectItem value="double-round-robin">
-                          Liga - 2 voltas
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
+                <Label htmlFor="name">Local</Label>
+                <Input
+                  id="location"
+                  {...register("location", { required: true })}
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-5 gap-2">
+            <div className="grid grid-cols-7 gap-2">
               <div className="col-span-2">
                 <Label htmlFor="sport_type">Modalidade</Label>
                 <Controller
@@ -194,9 +174,33 @@ TorneioFormProps) {
                         <SelectValue placeholder="" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Futebol">Futebol</SelectItem>
-                        <SelectItem value="Futsal">Futsal</SelectItem>
-                        <SelectItem value="Basquetebol">Basquetebol</SelectItem>
+                        {SPORT_TYPES.map((sport) => (
+                          <SelectItem key={sport.value} value={sport.value}>
+                            {sport.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+              </div>
+
+              <div className="col-span-2">
+                <Label htmlFor="tournament_type">Tipo de torneio</Label>
+                <Controller
+                  name="tournament_type"
+                  control={control}
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TOURNAMENT_TYPES.map((formato) => (
+                          <SelectItem key={formato.value} value={formato.value}>
+                            {formato.label}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   )}
@@ -308,7 +312,7 @@ TorneioFormProps) {
             </CardContent>
           </Card>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="flex justify-end space-x-2">
           <Button variant="default" type="submit" className="w-1/3">
             {"Criar"}
           </Button>

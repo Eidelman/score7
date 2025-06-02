@@ -1,98 +1,46 @@
-import React from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { auth, signIn, signOut } from "../utils/auth";
+import { auth } from "../utils/auth";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { SubmitButton } from "./SubmitButton";
+import { buttonVariants } from "@/components/ui/button";
+import Logo from "@/public/schoolLogo.png";
+import Image from "next/image";
+import ActiveLink from "./ActiveLink";
 
 export default async function Header() {
   const session = await auth();
-  console.log("Session: ", session?.user?.email);
+
   return (
-    <div className="flex flex-row items-center justify-between h-12 px-10 bg-green-700">
-      <Link href="/">Logo</Link>
-      <div className="flex flex-row gap-8 items-center">
+    <nav className="flex flex-row items-center justify-between h-20 px-24 w-full shadow-sm bg-green-500 fixed top-0 z-50">
+      <Link href="/" className={cn("flex flex-row items-center gap-0 text-xs")}>
+        <Image src={Logo} alt="Logo" className="size-14" />
+        <span>Colégio STP</span>
+      </Link>
+      <div className="flex flex-row space-x-14 items-center text-zinc-50">
         <>
+          {session?.user?.email ? (
+            <ActiveLink href="/dashboard/admin/torneio">
+              Painel de Administrador
+            </ActiveLink>
+          ) : (
+            <>
+              <ActiveLink href="/">Inicio</ActiveLink>
+              <ActiveLink href="/torneios">Torneios</ActiveLink>
+              <ActiveLink href="/sobre-nos">Sobre Nós</ActiveLink>
+            </>
+          )}
+        </>
+        {!session?.user?.email && (
           <Link
-            href="/"
-            className={cn("uppercase text-secondary font-semibold text-sm")}
-          >
-            Encontrar um torneio
-          </Link>
-          <Link
-            href="/dashboard/admin/torneio"
-            className={cn("uppercase text-secondary font-semibold text-sm")}
-          >
-            Admin
-          </Link>
-          <Link
-            href="/criar-torneio"
+            href="/login"
             className={cn(
-              "uppercase text-secondary font-semibold text-sm",
-              session?.user ? "block" : "hidden"
+              buttonVariants({ variant: "outline", size: "sm" }),
+              "rounded-full w-[100px] text-zinc-900"
             )}
           >
-            Criar um torneio
+            Entrar
           </Link>
-        </>
-        {session?.user?.email != null ? (
-          <div className="flex flex-row items-center gap-2">
-            <h1>{session.user.email}</h1>
-            <form
-              action={async () => {
-                "use server";
-                await signOut();
-              }}
-            >
-              <Button type="submit">Sair</Button>
-            </form>
-          </div>
-        ) : (
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="secondary" size="sm">
-                INSCREVER-SE/ENTRAR
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Login</DialogTitle>
-                <DialogDescription>
-                  Anyone who has this link will be able to view this.
-                </DialogDescription>
-              </DialogHeader>
-              <form
-                className="flex flex-col gap-4"
-                action={async (formData) => {
-                  "use server";
-                  await signIn("nodemailer", formData);
-                }}
-              >
-                <div className="flex items-center space-x-2">
-                  <div className="grid flex-1 gap-2">
-                    <Label htmlFor="email" className="">
-                      E-mail
-                    </Label>
-                    <Input id="email" name="email" type="email" required />
-                  </div>
-                </div>
-
-                <SubmitButton text="Submeter" />
-              </form>
-            </DialogContent>
-          </Dialog>
         )}
       </div>
-    </div>
+    </nav>
   );
 }

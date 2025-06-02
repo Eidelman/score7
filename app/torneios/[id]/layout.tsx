@@ -30,7 +30,7 @@ export default async function TorneioLayout({
     <div>
       <h1 className="text-center py-5 font-bold text-2xl">{torneio?.name}</h1>
       <TorneioNavbar basePath={basePath} />
-      <main className="py-8">{children}</main>
+      <main className="pt-8 pb-20">{children}</main>
     </div>
   );
 }

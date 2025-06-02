@@ -60,12 +60,10 @@ export default async function TorneioEditar({
   const { allPlayed } = await checkTournamentMatches(Number(id));
 
   return (
-    <Card className="max-w-4xl mx-auto my-5 space-y-4">
+    <Card className="">
       <CardHeader>
         <div className="flex justify-between items-center">
-          <CardTitle className="text-xl font-mono">
-            Torneio: {torneio?.name}
-          </CardTitle>
+          <CardTitle className="text-xl">Torneio: {torneio?.name}</CardTitle>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -75,8 +73,12 @@ export default async function TorneioEditar({
           <CardHeader>
             <div className="flex justify-between items-center">
               <CardTitle className="flex flex-row justify-between w-full items-center text-xl font-mono">
-                <div>Matches</div>
-                <div>
+                <div>Partidas</div>
+                <div
+                  className={
+                    torneio?.tournament_type !== "knockout" ? "hidden" : ""
+                  }
+                >
                   <form action={generateNextRoundNewMatches}>
                     <input
                       type="hidden"
@@ -89,7 +91,7 @@ export default async function TorneioEditar({
                       className="rounded-full"
                       disabled={!allPlayed}
                     >
-                      Generate next round
+                      Gerar Próxima Rodada
                     </Button>
                   </form>
                 </div>

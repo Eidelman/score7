@@ -25,10 +25,10 @@ const TorneioRoute = async () => {
   const torneios = await getAllTournaments();
 
   return (
-    <Card className="max-w-4xl mx-auto my-5">
+    <Card className="p-8">
       <CardHeader className="pb-0 space-y-8">
         <div className="flex justify-between items-center">
-          <CardTitle className="text-xl font-mono">Lista de Torneios</CardTitle>
+          <CardTitle className="text-xl">Lista de Torneios</CardTitle>
           <Link href="/dashboard/admin/torneio/novo">
             <Button variant="outline" className="rounded-full">
               <Plus className="mr-2" size={16} /> Criar Torneio

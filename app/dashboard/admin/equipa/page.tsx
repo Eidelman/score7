@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { PrismaClient } from "@prisma/client";
+import Image from "next/image";
 
 export async function getAllTeams() {
   const prisma = new PrismaClient();
@@ -22,7 +23,7 @@ const TeamList = async () => {
   const teams = await getAllTeams();
 
   return (
-    <Card className="max-w-3xl mx-auto my-5">
+    <Card className="p-8">
       <CardHeader className="pb-0 space-y-8">
         <div className="flex justify-between items-center">
           <CardTitle className="text-xl font-mono">Lista de Equipas</CardTitle>
@@ -33,18 +34,40 @@ const TeamList = async () => {
           </Link>
         </div>
 
-        <div className="grid grid-cols-6 border-b border-gray-200 pt-3 items-center">
-          <Label className="col-span-2 font-semibold">Nome</Label>
-          <Label className="col-span-2 font-semibold">Treinador</Label>
-          <Label className="col-span-1 font-semibold">Regiao</Label>
+        <div className="grid grid-cols-7 border-b border-gray-200 pt-3 items-center">
+          <Label className="col-span-1 font-semibold text-muted-foreground">
+            Logo
+          </Label>
+          <Label className="col-span-2 font-semibold text-muted-foreground">
+            Nome
+          </Label>
+          <Label className="col-span-2 font-semibold text-muted-foreground">
+            Treinador
+          </Label>
+          <Label className="col-span-1 font-semibold text-muted-foreground">
+            Região
+          </Label>
         </div>
       </CardHeader>
       <CardContent>
         {teams?.map((team) => (
           <div
             key={team.team_id}
-            className="grid grid-cols-6 border-b border-gray-200 py-2 items-center"
+            className="grid grid-cols-7 border-b border-gray-200 py-2 items-center"
           >
+            <div className="col-span-1 flex justify-start items-center">
+              <Image
+                src={
+                  team?.logo_url
+                    ? team.logo_url
+                    : "/equipas/default-team-logo.png"
+                }
+                alt="team"
+                width={28}
+                height={28}
+                className=""
+              />
+            </div>
             <Label className="col-span-2">{team.team_name}</Label>
             <Label className="col-span-2">{team.coach_name}</Label>
             <Label className="col-span-1 ">{team.region}</Label>

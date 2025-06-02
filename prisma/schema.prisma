@@ -102,6 +102,7 @@ model Team {
   team_name  String   @db.VarChar(100)
   coach_name String   @db.VarChar(100)
   region     String   @db.VarChar(100)
+  logo_url   String?  @db.VarChar(255)
 
   players     Player[]
   matches1    Match[]  @relation("Team1")
@@ -132,6 +133,7 @@ model Player {
   email         String   @db.VarChar(100)
   team_id       Int
   team          Team     @relation(fields: [team_id], references: [team_id], onDelete: Cascade)
+  photo_url      String?  @db.VarChar(255)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

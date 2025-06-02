@@ -207,21 +207,32 @@ interface TournamentSearchParams {
   name?: string;
   tournament_type?: string;
   sport_type?: string;
+  year?: number;
+  start_date?: Date;
 }
 
 export async function findTournament({
   name,
   sport_type,
   tournament_type,
+  year,
 }: TournamentSearchParams) {
-  //const { name, tournament_type, sport_type } = params;
-
   // Build dynamic filter object
   const whereClause: TournamentSearchParams = {};
 
   if (name) whereClause.name = name;
   if (tournament_type) whereClause.tournament_type = tournament_type;
   if (sport_type) whereClause.sport_type = sport_type;
+  if (year) {
+    const startOfYear = new Date(`${year}-01-01T00:00:00.000Z`);
+    const endOfYear = new Date(`${year + 1}-01-01T00:00:00.000Z`);
+    whereClause.start_date = {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      gte: startOfYear,
+      lt: endOfYear,
+    };
+  }
 
   // Perform the search using the constructed where clause
   const tournaments = await prisma.tournament.findMany({

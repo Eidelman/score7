@@ -50,7 +50,7 @@ export const EditarTorneioForm = ({ data }: EditarTorneioFormProps) => {
   return (
     <Card className="">
       <CardHeader className="flex flex-row justify-between items-center">
-        <CardTitle className="">General Info</CardTitle>
+        <CardTitle className="">Informação Geral</CardTitle>
         <Button type="submit" variant="outline" className="rounded-full">
           <Send className="mr-2" size={16} /> Modificar
         </Button>
@@ -77,9 +77,9 @@ export const EditarTorneioForm = ({ data }: EditarTorneioFormProps) => {
 
             <div className="grid grid-cols-5 gap-2">
               <div className="col-span-2">
-                <Label htmlFor="tournament_type">Modalidade</Label>
+                <Label htmlFor="sport_type">Modalidade</Label>
                 <Controller
-                  name="tournament_type"
+                  name="sport_type"
                   control={control}
                   render={({ field }) => (
                     <Select onValueChange={field.onChange} value={field.value}>

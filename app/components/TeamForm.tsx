@@ -46,6 +46,7 @@ export default function TeamForm({ formTile, defaultData }: TeamFormProps) {
       team_name: defaultData?.team_name || "",
       coach_name: defaultData?.coach_name || "",
       region: defaultData?.region || "",
+      logo_url: defaultData?.logo_url || "",
       players:
         (modifiedPlayers ?? []).map((player) => ({
           ...player,
@@ -86,7 +87,7 @@ export default function TeamForm({ formTile, defaultData }: TeamFormProps) {
     <form
       onSubmit={handleSubmit(defaultData ? onSubmitUpdate : onSubmitCreate)}
     >
-      <Card className="max-w-5xl mx-auto my-5">
+      <Card className="p-0">
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle className="text-xl font-mono">{formTile}</CardTitle>
@@ -98,7 +99,7 @@ export default function TeamForm({ formTile, defaultData }: TeamFormProps) {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-7 gap-2">
+          <div className="grid grid-cols-9 gap-2">
             <div className="col-span-3">
               <Label htmlFor="team_name">Nome da Equipa</Label>
               <Input
@@ -119,9 +120,17 @@ export default function TeamForm({ formTile, defaultData }: TeamFormProps) {
               <Label htmlFor="region">Região</Label>
               <Input id="region" {...register("region", { required: true })} />
             </div>
+
+            <div className="col-span-2">
+              <Label htmlFor="logo_url">Logo</Label>
+              <Input
+                id="logo_url"
+                {...register("logo_url", { required: true })}
+              />
+            </div>
           </div>
 
-          <Card className="space-y-4">
+          <Card className="space-y-4 p-0">
             <CardHeader>
               <div className="flex justify-between items-center">
                 <CardTitle className="text-xl font-mono">Jogadores</CardTitle>
@@ -137,6 +146,7 @@ export default function TeamForm({ formTile, defaultData }: TeamFormProps) {
                       date_of_birth: new Date(),
                       number: null,
                       position: "",
+                      photo_url: null,
                     })
                   }
                 >
@@ -145,13 +155,13 @@ export default function TeamForm({ formTile, defaultData }: TeamFormProps) {
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-2 px-1">
               {fields.map((field, index) => (
                 <div
                   key={field.id}
-                  className="flex flex-col gap-4 border rounded-md p-4 pr-12 relative"
+                  className="flex flex-col gap-2 p-2 pr-10 relative"
                 >
-                  <div className="grid grid-cols-5 gap-2 justify-center">
+                  <div className="grid grid-cols-9 gap-1">
                     <Input
                       className="col-span-2"
                       placeholder="Nome"
@@ -160,15 +170,12 @@ export default function TeamForm({ formTile, defaultData }: TeamFormProps) {
                       })}
                     />
                     <Input
-                      className="col-span-3"
+                      className="col-span-2"
                       placeholder="Apelido"
                       {...register(`players.${index}.last_name`, {
                         required: true,
                       })}
                     />
-                  </div>
-
-                  <div className="grid grid-cols-5 gap-2">
                     <Input
                       type="number"
                       className="col-span-1"
@@ -185,7 +192,7 @@ export default function TeamForm({ formTile, defaultData }: TeamFormProps) {
                           onValueChange={field.onChange}
                           value={field.value}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger className="col-span-1">
                             <SelectValue placeholder="Posição" />
                           </SelectTrigger>
                           <SelectContent>
@@ -210,15 +217,15 @@ export default function TeamForm({ formTile, defaultData }: TeamFormProps) {
                     />
                     <Input
                       className="col-span-2"
-                      placeholder="Email"
-                      type="email"
-                      {...register(`players.${index}.email`, {
+                      placeholder="Foto URL"
+                      type="text"
+                      {...register(`players.${index}.photo_url`, {
                         required: true,
                       })}
                     />
                   </div>
 
-                  <div className="flex justify-end absolute right-2 top-10">
+                  <div className="flex justify-end absolute right-0 top-2">
                     <Button
                       size="icon"
                       variant="ghost"

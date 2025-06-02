@@ -14,6 +14,7 @@ export const PlayerSchema = z.object({
   email: z.string().email().max(100),
   date_of_birth: z.coerce.date(), // accepts string/date and converts
   team_id: z.number().int().optional(),
+  photo_url: z.string().max(100).nullable().optional(),
 });
 
 export const TeamSchema = z.object({
@@ -21,6 +22,7 @@ export const TeamSchema = z.object({
   team_name: z.string().max(100),
   coach_name: z.string().max(100),
   region: z.string().max(100),
+  logo_url: z.string().max(100),
   players: z.array(PlayerSchema),
 });
 

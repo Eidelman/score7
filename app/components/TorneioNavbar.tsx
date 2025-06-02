@@ -8,16 +8,8 @@ const TorneioNavbar = ({ basePath }: { basePath: string }) => {
   const pathname = usePathname();
 
   return (
-    <nav className="flex flex-row justify-center border-b pb-2 pt-4">
-      <ul
-        style={{
-          display: "flex",
-          gap: 24,
-          listStyle: "none",
-          padding: 0,
-          margin: 0,
-        }}
-      >
+    <nav className="flex flex-row justify-center pb-2 pt-4">
+      <ul className="flex flex-row gap-5 justify-center items-center">
         {navItems.map((item) => {
           const href = item.href ? `${basePath}/${item.href}` : basePath;
           const isActive = pathname === href;
@@ -26,10 +18,10 @@ const TorneioNavbar = ({ basePath }: { basePath: string }) => {
               <Link
                 href={href}
                 className={cn(
-                  "uppercase text-sm",
+                  "uppercase text-xs",
                   isActive
-                    ? "underline text-[#0070f3] font-bold"
-                    : "no-underline text-[#222] font-normal"
+                    ? "text-[#0070f3] font-bold"
+                    : "text-[#222] font-normal"
                 )}
               >
                 {item.name}
