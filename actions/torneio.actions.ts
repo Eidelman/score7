@@ -1,6 +1,9 @@
 "use server";
 
-import { TournamentSchema } from "@/app/utils/zodSchemas";
+import {
+  TournamentModifySchema,
+  TournamentSchema,
+} from "@/app/utils/zodSchemas";
 import { PrismaClient } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -161,25 +164,24 @@ export const createTournament = async (
 
 // Update a tournament
 export const updateTournament = async (
-  data: z.infer<typeof TournamentSchema>
+  data: z.infer<typeof TournamentModifySchema>
 ) => {
+  console.log("Data received for update:", data);
   try {
-    await prisma.tournament.update({
+    const t = await prisma.tournament.update({
       where: { tournament_id: data.tournament_id },
       data: {
         name: data.name,
         location: data.location,
         start_date: data.start_date,
         end_date: data.end_date,
-        tournament_type: data.tournament_type,
         description: data.description,
-        participants: data.participants,
         sport_type: data.sport_type ?? undefined,
       },
     });
     // 2. Revalidate a specific path
-    revalidatePath("/dashboard/admin/torneio/" + data.tournament_id); // or '/', '/dashboard', etc.
-    //return tournament;
+    revalidatePath("dashboard/admin/torneio");
+    return t;
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(`Error fetching tournament: ${error.message}`);

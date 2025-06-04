@@ -38,7 +38,7 @@ const TournamentSection = async () => {
   return (
     <section className="h-1/3 flex flex-col px-28 gap-1">
       <h2 className="text-lx font-bold">Torneios Atuais</h2>
-      <div className="grid grid-cols-4 overflow-x-auto justify-evenly">
+      <div className="grid grid-cols-4 overflow-x-auto gap-4">
         {recentTournaments.map((tournament, idx) => (
           <CurrentTournaments
             key={tournament.tournament_id ?? idx}

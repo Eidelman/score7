@@ -2,6 +2,7 @@ import { generateNextRoundNewMatches } from "@/actions/createSorteio";
 import { EditarTorneioForm } from "@/app/components/EditarTorneioForm";
 import { MatchActionsBtn } from "@/app/components/MatchActionsBtn";
 import { checkTournamentMatches } from "@/app/utils/checkTournamentMatches";
+import { TOURNAMENT_TYPES } from "@/app/utils/constants";
 import { TournamentSchema } from "@/app/utils/zodSchemas";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -76,7 +77,9 @@ export default async function TorneioEditar({
                 <div>Partidas</div>
                 <div
                   className={
-                    torneio?.tournament_type !== "knockout" ? "hidden" : ""
+                    torneio?.tournament_type !== TOURNAMENT_TYPES[0].value
+                      ? "hidden"
+                      : ""
                   }
                 >
                   <form action={generateNextRoundNewMatches}>
@@ -125,6 +128,7 @@ function Match({ match }: { match: any }) {
             team2={match.team2.team_name}
             torneio_id={match.tournament_id}
             schedule_id={match.schedule?.schedule_id}
+            matchStartTime={match.schedule?.start_time}
           />
         </div>
       </div>

@@ -7,12 +7,14 @@ export function MatchActionsBtn({
   schedule_id,
   team1,
   team2,
+  matchStartTime,
 }: {
   torneio_id: number;
   match_id: number;
   schedule_id: number;
   team1: string;
   team2: string;
+  matchStartTime: Date;
 }) {
   return (
     <div className="flex flex-row items-center space-x-2">
@@ -23,7 +25,11 @@ export function MatchActionsBtn({
         team2={team2}
       />
 
-      <UpdateSechedule schedule_id={schedule_id} />
+      <UpdateSechedule
+        schedule_id={schedule_id}
+        startTime={matchStartTime}
+        torneio_id={torneio_id}
+      />
     </div>
   );
 }

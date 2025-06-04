@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { List, Trash2 } from "lucide-react";
+import { CalendarIcon, List, Trash2 } from "lucide-react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -28,6 +28,14 @@ import { createSingleRoundRobinTournament } from "@/actions/createSingleRoundRob
 import { createDoubleRoundRobinTournament } from "@/actions/createDoubleRoundRobinTournament";
 import { createKnockoutTournament } from "@/actions/knockout.action";
 import { SPORT_TYPES, TOURNAMENT_TYPES } from "../utils/constants";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 type TeamType = {
   team_id: number;
@@ -93,11 +101,11 @@ TorneioFormProps) {
       torneio = await createKnockoutTournament(data);
     }
 
-    if (data.tournament_type === TOURNAMENT_TYPES[0].value) {
+    if (data.tournament_type === TOURNAMENT_TYPES[1].value) {
       torneio = await createSingleRoundRobinTournament(data);
     }
 
-    if (data.tournament_type === TOURNAMENT_TYPES[0].value) {
+    if (data.tournament_type === TOURNAMENT_TYPES[2].value) {
       torneio = await createDoubleRoundRobinTournament(data);
     }
 
@@ -233,25 +241,69 @@ TorneioFormProps) {
 
               <div className="col-span-1">
                 <Label htmlFor="start_date">Inico</Label>
-                <Input
-                  id="start_date"
-                  placeholder="Data de inicio"
-                  type="date"
-                  {...register("start_date", {
-                    required: true,
-                  })}
+                <Controller
+                  control={control}
+                  name="start_date"
+                  render={({ field }) => (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {field.value
+                            ? format(field.value, "P")
+                            : "Pick a date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  )}
                 />
               </div>
 
               <div className="col-span-1">
                 <Label htmlFor="end_date">Termino</Label>
-                <Input
-                  id="end_date"
-                  placeholder="Data de fim"
-                  type="date"
-                  {...register("end_date", {
-                    required: true,
-                  })}
+                <Controller
+                  control={control}
+                  name="end_date"
+                  render={({ field }) => (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {field.value
+                            ? format(field.value, "P")
+                            : "Pick a date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  )}
                 />
               </div>
             </div>

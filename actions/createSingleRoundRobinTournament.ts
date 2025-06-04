@@ -27,12 +27,6 @@ export async function createSingleRoundRobinTournament(
       "At least 2 participants are required for a league tournament."
     );
   }
-
-  const numTeams = teams.length;
-  const roundsPerLeg = numTeams - 1;
-  const totalRounds = roundsPerLeg * 2;
-  const matchesPerRound = numTeams / 2;
-
   // 1. Create the tournament
   const tournament = await prisma.tournament.create({
     data: {
@@ -43,84 +37,64 @@ export async function createSingleRoundRobinTournament(
       tournament_type,
       description,
       sport_type,
-      participants: numTeams,
+      participants: teams.length,
     },
   });
+  // 2. Create matches for each pair of teams
+  const matchesToCreate = [];
+  const matchDurationMinutes = 60;
+  let currentTime = new Date(tournament.start_date);
+  const endTime = new Date(tournament.end_date);
+  let round = 1;
 
-  // 2. Generate the round-robin schedule
-  const schedule: {
-    round: number;
-    match_date: Date;
-    player1: number;
-    player2: number;
-  }[] = [];
+  for (let i = 0; i < teams.length - 1; i++) {
+    for (let j = i + 1; j < teams.length; j++) {
+      if (currentTime > endTime)
+        throw new Error("Not enough time to schedule all matches");
 
-  const fixed = teams[0];
-  const rotating = teams.slice(1);
-
-  for (let round = 0; round < roundsPerLeg; round++) {
-    const roundNumber = round + 1;
-
-    const pairings: [number, number][] = [];
-    const left = [fixed, ...rotating.slice(0, matchesPerRound - 1)];
-    const right = [...rotating.slice(matchesPerRound - 1)].reverse();
-
-    for (let i = 0; i < matchesPerRound; i++) {
-      const team1 = left[i];
-      const team2 = right[i];
-
-      pairings.push([team1.team_id, team2.team_id]);
-    }
-
-    // First leg
-    pairings.forEach(([p1, p2]) => {
-      schedule.push({
-        round: roundNumber,
-        match_date: new Date(
-          start_date.getTime() + round * 24 * 60 * 60 * 1000
-        ),
-        player1: p1,
-        player2: p2,
+      matchesToCreate.push({
+        tournament_id: tournament.tournament_id,
+        round: `Jornada ${round++}`,
+        match_date: currentTime,
+        team1_id: teams[i].team_id,
+        team2_id: teams[j].team_id,
+        score_team1: null,
+        score_team2: null,
+        winner_team_id: null,
       });
-    });
+
+      // Update time for next match
+      currentTime = new Date(
+        currentTime.getTime() + (matchDurationMinutes + 15) * 60000
+      );
+    }
   }
 
-  // 3. Insert matches into the database
-  const matchData = schedule.map((match) => ({
-    tournament_id: tournament.tournament_id,
-    round: `Jornada ${match.round}`,
-    match_date: match.match_date,
-    team1_id: match.player1,
-    team2_id: match.player2,
-  }));
-
-  await prisma.match.createMany({
-    data: matchData,
+  // Create matches in DB
+  const createdMatches = await prisma.match.createMany({
+    data: matchesToCreate,
   });
 
-  // 5. Schedule matches at the venue
-  const matches = await prisma.match.findMany({
+  const allMatches = await prisma.match.findMany({
     where: { tournament_id: tournament.tournament_id },
   });
 
-  for (let i = 0; i < matches.length; i++) {
-    const match = matches[i];
-    const startTime = new Date();
-    startTime.setDate(startTime.getDate() + i); // Spread matches out by day
+  const schedules = allMatches.map((match) => ({
+    match_id: match.match_id,
+    start_time: match.match_date,
+    end_time: new Date(
+      new Date(match.match_date).getTime() + matchDurationMinutes * 60000
+    ),
+    venue_id: null, // Optional, or assign based on logic
+  }));
 
-    await prisma.schedule.create({
-      data: {
-        match_id: match.match_id,
-        //venue_id:, // Assuming you have a venue_id from the match
-        start_time: startTime,
-        end_time: new Date(startTime.getTime() + 1.5 * 60 * 60 * 1000), // +1 hours e 30 minutes
-      },
-    });
-  }
+  await prisma.schedule.createMany({ data: schedules });
+
+  console.log(`${createdMatches.count} matches created successfully.`);
 
   return {
     tournament,
-    totalRounds,
-    totalMatches: matchData.length,
+    totalRounds: (teams.length - 1) * 2,
+    totalMatches: createdMatches.count,
   };
 }

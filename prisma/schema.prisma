@@ -130,7 +130,7 @@ model Player {
   date_of_birth DateTime @db.Date
   number Int?
   position PlayerPosition
-  email         String   @db.VarChar(100)
+  email         String?   @db.VarChar(100)
   team_id       Int
   team          Team     @relation(fields: [team_id], references: [team_id], onDelete: Cascade)
   photo_url      String?  @db.VarChar(255)

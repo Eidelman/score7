@@ -89,26 +89,24 @@ export async function updateMatchScore({
 }
 
 type Schedule = {
+  torneio_id: number;
   scheduleId: number;
-  start_time: string;
-  venue_id: number;
+  start_time: Date;
 };
 export async function updateSchedule({
   scheduleId,
   start_time,
-  venue_id,
+  torneio_id,
 }: Schedule) {
   try {
-    const updatedSchedule = await prisma.schedule.update({
+    await prisma.schedule.update({
       where: { schedule_id: scheduleId },
       data: {
         start_time: start_time,
-        end_time: "",
-        venue_id: venue_id,
       },
     });
 
-    return updatedSchedule;
+    revalidatePath("/dashboard/amdin/torneio/" + torneio_id);
   } catch (error) {
     console.error("Error updating schedule:", error);
     throw error;

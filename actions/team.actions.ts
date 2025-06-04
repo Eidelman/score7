@@ -7,7 +7,7 @@ import { TeamSchema } from "../app/utils/zodSchemas";
 const prisma = new PrismaClient();
 
 export async function createTeam(data: z.infer<typeof TeamSchema>) {
-  const { team_name, coach_name, region, players } = data;
+  const { team_name, coach_name, region, players, logo_url } = data;
   // Create Teams & Players
   console.log("Creating team with data:", data);
   const team = await prisma.team.create({
@@ -15,6 +15,7 @@ export async function createTeam(data: z.infer<typeof TeamSchema>) {
       team_name: team_name,
       coach_name: coach_name,
       region: region,
+      logo_url: logo_url,
       players: {
         create: players
           .filter((player) => player && player.date_of_birth) // just in case
@@ -65,7 +66,7 @@ export async function deleteTeam(id: number) {
 }
 
 export async function updateTeam(data: z.infer<typeof TeamSchema>) {
-  const { team_name, coach_name, region, players } = data;
+  const { team_name, coach_name, region, players, logo_url } = data;
   // Update Team and Players
   const team = await prisma.team.update({
     where: { team_id: data.team_id },
@@ -73,6 +74,7 @@ export async function updateTeam(data: z.infer<typeof TeamSchema>) {
       team_name: team_name,
       coach_name: coach_name,
       region: region,
+      logo_url: logo_url || null, // Handle optional logo_url
       players: {
         update: players
           .filter((player) => player.player_id) // Only update existing players
@@ -85,6 +87,7 @@ export async function updateTeam(data: z.infer<typeof TeamSchema>) {
               date_of_birth: new Date(player.date_of_birth),
               number: player.number ? player.number : 0,
               position: player.position as PlayerPosition, // Cast to PlayerPosition enum
+              photo_url: player.photo_url || null, // Handle optional photo_url
             },
           })),
         createMany: {

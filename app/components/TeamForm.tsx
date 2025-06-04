@@ -4,7 +4,6 @@ import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { List, Plus, Trash2 } from "lucide-react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,6 +25,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+import { CalendarIcon, List, Plus, Trash2 } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 
 interface TeamFormProps {
   formTile: string;
@@ -33,11 +40,6 @@ interface TeamFormProps {
 }
 
 export default function TeamForm({ formTile, defaultData }: TeamFormProps) {
-  const modifiedPlayers = defaultData?.players.map((player) => ({
-    ...player,
-    date_of_birth: new Date(format(player.date_of_birth, "dd/mm/yyyy")),
-  }));
-
   const { register, handleSubmit, control, reset } = useForm<
     z.infer<typeof TeamSchema>
   >({
@@ -47,11 +49,7 @@ export default function TeamForm({ formTile, defaultData }: TeamFormProps) {
       coach_name: defaultData?.coach_name || "",
       region: defaultData?.region || "",
       logo_url: defaultData?.logo_url || "",
-      players:
-        (modifiedPlayers ?? []).map((player) => ({
-          ...player,
-          date_of_birth: new Date(player.date_of_birth),
-        })) || [],
+      players: defaultData?.players,
     },
   });
 
@@ -161,7 +159,7 @@ export default function TeamForm({ formTile, defaultData }: TeamFormProps) {
                   key={field.id}
                   className="flex flex-col gap-2 p-2 pr-10 relative"
                 >
-                  <div className="grid grid-cols-9 gap-1">
+                  <div className="grid grid-cols-8 gap-1">
                     <Input
                       className="col-span-2"
                       placeholder="Nome"
@@ -192,7 +190,7 @@ export default function TeamForm({ formTile, defaultData }: TeamFormProps) {
                           onValueChange={field.onChange}
                           value={field.value}
                         >
-                          <SelectTrigger className="col-span-1">
+                          <SelectTrigger className="col-span-2">
                             <SelectValue placeholder="Posição" />
                           </SelectTrigger>
                           <SelectContent>
@@ -207,19 +205,51 @@ export default function TeamForm({ formTile, defaultData }: TeamFormProps) {
                       )}
                     />
 
-                    <Input
-                      className="col-span-1"
-                      placeholder="Data de nascimento"
-                      type="date"
-                      {...register(`players.${index}.date_of_birth`, {
-                        required: true,
-                      })}
+                    <Controller
+                      control={control}
+                      name={`players.${index}.date_of_birth`}
+                      render={({ field }) => (
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-full justify-start text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {field.value
+                                ? format(field.value, "P")
+                                : "Pick a date"}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0">
+                            <Calendar
+                              mode="single"
+                              selected={field.value}
+                              onSelect={field.onChange}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      )}
                     />
+
                     <Input
                       className="col-span-2"
                       placeholder="Foto URL"
                       type="text"
                       {...register(`players.${index}.photo_url`, {
+                        required: true,
+                      })}
+                    />
+
+                    <Input
+                      className="col-span-2"
+                      placeholder="Email"
+                      type="email"
+                      {...register(`players.${index}.email`, {
                         required: true,
                       })}
                     />
