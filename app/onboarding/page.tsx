@@ -39,9 +39,7 @@ export default function Onboarding() {
       <Card className="max-w-sm mx-auto">
         <CardHeader>
           <CardTitle className="text-xl">Você está quase terminando!</CardTitle>
-          <CardDescription>
-            Insira o seu NIF e BI para criar uma conta
-          </CardDescription>
+          <CardDescription>Insira os seus dados</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-2">
