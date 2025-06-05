@@ -41,20 +41,53 @@ const TorneioPage: React.FC<TorneioPageProps> = async ({ params }) => {
   const totalTeams = uniqueTeamIds.size;
 
   return (
-    <main className="container max-w-4xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Torneio: {tournament?.name}</h1>
-      {/* Conteúdo do torneio será adicionado aqui */}
-      <section>
-        <p>{tournament?.description}</p>
-        <p>{tournament?.location}</p>
-        <p>{tournament?.sport_type}</p>
-        <p>{tournament?.tournament_type}</p>
-        <p>{tournament?.start_date.toLocaleDateString()}</p>
-        <p>{tournament?.end_date.toLocaleDateString()}</p>
-        <p>{totalMatches}</p>
-        <p>{totalTeams}</p>
-      </section>
-    </main>
+    <div className="max-w-2xl mx-auto mt-10 p-6 bg-white rounded-lg shadow">
+      <h1 className="text-3xl font-bold mb-4">{tournament?.name}</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div>
+          <p className="text-gray-600 font-semibold">Tipo de Torneio</p>
+          <p className="text-gray-900">{tournament?.tournament_type}</p>
+        </div>
+        <div>
+          <p className="text-gray-600 font-semibold">Modalidade</p>
+          <p className="text-gray-900">{tournament?.sport_type}</p>
+        </div>
+        <div>
+          <p className="text-gray-600 font-semibold">Data de Início</p>
+          <p className="text-gray-900">
+            {tournament?.start_date
+              ? new Date(tournament.start_date).toLocaleDateString()
+              : "-"}
+          </p>
+        </div>
+        <div>
+          <p className="text-gray-600 font-semibold">Data de Fim</p>
+          <p className="text-gray-900">
+            {tournament?.end_date
+              ? new Date(tournament.end_date).toLocaleDateString()
+              : "-"}
+          </p>
+        </div>
+        <div>
+          <p className="text-gray-600 font-semibold">Localização</p>
+          <p className="text-gray-900">{tournament?.location || "-"}</p>
+        </div>
+        <div>
+          <p className="text-gray-600 font-semibold">Equipas</p>
+          <p className="text-gray-900">{totalTeams}</p>
+        </div>
+        <div>
+          <p className="text-gray-600 font-semibold">Jogos</p>
+          <p className="text-gray-900">{totalMatches}</p>
+        </div>
+      </div>
+      {tournament?.description && (
+        <div className="mt-4">
+          <h2 className="text-xl font-semibold mb-2">Descrição</h2>
+          <p className="text-gray-800">{tournament.description}</p>
+        </div>
+      )}
+    </div>
   );
 };
 

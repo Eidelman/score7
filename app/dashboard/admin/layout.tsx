@@ -1,4 +1,6 @@
-import { auth, signOut } from "@/app/utils/auth";
+import { signOut } from "@/app/utils/auth";
+import prisma from "@/app/utils/db";
+import { requireUser } from "@/app/utils/hooks";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -13,11 +15,26 @@ const sidebarLinks = [
   { name: "Equipas", href: "/dashboard/admin/equipa" },
 ];
 
-export default async function AdminLayout({ children }: AdminLayoutProps) {
-  const session = await auth();
-  if (!session?.user) {
-    redirect("/");
+async function getUser(userId: string) {
+  const data = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+    select: {
+      name: true,
+    },
+  });
+
+  console.log("User data:", !data);
+
+  if (data?.name === null || data?.name === "") {
+    redirect("/onboarding");
   }
+}
+
+export default async function AdminLayout({ children }: AdminLayoutProps) {
+  const session = await requireUser();
+  await getUser(session.user?.id as string);
 
   return (
     <div className="flex flex-row">

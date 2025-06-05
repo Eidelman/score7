@@ -10,7 +10,7 @@ export default async function Header() {
   const session = await auth();
 
   return (
-    <nav className="flex flex-row items-center justify-between h-20 px-24 w-full shadow-sm bg-green-500 fixed top-0 z-50">
+    <nav className="flex flex-row items-center justify-between h-20 px-24 w-full shadow-sm bg-zinc-900 fixed top-0 z-50">
       <Link href="/" className={cn("flex flex-row items-center gap-0 text-xs")}>
         <Image src={Logo} alt="Logo" className="size-14" />
         <span>Colégio STP</span>
